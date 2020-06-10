@@ -5,6 +5,8 @@ Spyder Editor
 This is a temporary script file.
 """
 
+import asyncio
+import random
 import serial
 import tkinter as tk
 from tkinter import filedialog
@@ -15,6 +17,10 @@ import time
 from CurveWindow import CurveWindow    
 from SerialDialog import SerialDialog
 
+async def getSample(lock):
+    await asyncio.sleep(1)
+    value = random.randint(0, 1023)
+    return value
 
 class MainFrame(tk.Frame):
     def __init__(self, master=None):
@@ -29,13 +35,13 @@ class MainFrame(tk.Frame):
         self.menuButton.menu = tk.Menu(self.menuButton)
         self.menuButton["menu"] = self.menuButton.menu
         self.menuButton.menu.add_command(label="Iniciar captura",
-                                         command=self.logEvents)
+                                         command=self.startCapture)
         
         # Curva
         self.curve = CurveWindow(self)
         self.curve.grid()
         
-    def logEvents(self):
+    def startCapture(self):
         #filename = filedialog.askopenfilename(
         #    filetypes=[("Arquivos de áudio", ".wav")])
         #if filename:
