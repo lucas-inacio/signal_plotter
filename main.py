@@ -55,17 +55,19 @@ class MainFrame(tk.Frame):
             if self.serialPort.available() > 1:
                 valor = self.serialPort.readUint16()
                 print(valor)
-        else:
-            return
-        self.master.after(100, self.getSample)
+            self.master.after(100, self.getSample)
 
     def openFile(self):
         filename = filedialog.askopenfilename(
             filetypes=[("Arquivos de texto", ".txt")])
         if filename:
             pass
-  
-root = tk.Tk()
-root.option_add('*tearOff', False)
-app = MainFrame(master=root)
-app.mainloop()
+
+def main():
+    root = tk.Tk()
+    root.option_add('*tearOff', False)
+    app = MainFrame(master=root)
+    app.mainloop()
+
+if __name__ == '__main__':
+    main()
