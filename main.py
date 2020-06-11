@@ -48,16 +48,16 @@ class MainFrame(tk.Frame):
     def startCapture(self):
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
         if self.serialPort.isOpen():
-            self.master.after(100, self.logLoop)
+            self.master.after(100, self.getSample)
         
-    def logLoop(self):
+    def getSample(self):
         if self.serialPort.isOpen():
             if self.serialPort.available() > 1:
                 valor = self.serialPort.readUint16()
                 print(valor)
         else:
             return
-        self.master.after(100, self.logLoop)
+        self.master.after(100, self.getSample)
 
     def openFile(self):
         filename = filedialog.askopenfilename(
