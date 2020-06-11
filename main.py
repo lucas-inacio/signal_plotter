@@ -40,13 +40,16 @@ class MainFrame(tk.Frame):
         # Curva
         self.curve = CurveWindow(self)
         self.curve.grid()
+
+    def onComSettings(self, comsettings):
+        print(comsettings)
         
     def startCapture(self):
         #filename = filedialog.askopenfilename(
         #    filetypes=[("Arquivos de áudio", ".wav")])
         #if filename:
         #    pass
-        dialog = SerialDialog(self)
+        SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
         
     def logLoop(self):
         pass

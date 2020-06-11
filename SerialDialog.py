@@ -40,6 +40,5 @@ class SerialDialog(tk.simpledialog.Dialog):
     def apply(self):
         self.comsettings['port'] = self.port.get()
         if self.callback: self.callback(self.comsettings)
-        print(self.comsettings)
 
 
