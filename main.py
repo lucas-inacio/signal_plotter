@@ -38,6 +38,7 @@ class MainFrame(tk.Frame):
         # Curva
         self.curve = CurveWindow(self)
         self.curve.grid()
+        self.serialPort = serial.Serial()
 
     def onComSettings(self, comsettings):
         parity = serial.PARITY_EVEN
@@ -48,7 +49,8 @@ class MainFrame(tk.Frame):
         else:
             parity = serial.PARITY_EVEN
 
-        self.serialPort = serial.Serial()
+        if self.serialPort.is_open:
+            self.serialPort.close()
         self.serialPort.port = comsettings['port']
         self.serialPort.baudrate = int(comsettings['baudrate'])
         self.serialPort.parity = parity
@@ -62,7 +64,10 @@ class MainFrame(tk.Frame):
             self.master.after(100, self.logLoop)
         
     def logLoop(self):
-        print('Yeah')
+        if self.serialPort.is_open:
+            self.serialPort.read() # Pode fornecer o número de bytes como argumento
+        else:
+            return
         self.master.after(100, self.logLoop)
 
     def openFile(self):
