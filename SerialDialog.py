@@ -14,9 +14,9 @@ class SerialDialog(tk.simpledialog.Dialog):
     def __init__(self, master=None, title='None', callback=None):
         self.comsettings = {
             'port': '',
-            'baudRate': '9600',
+            'baudrate': '9600',
             'parity': 'Nenhuma',     # None, Even, Odd
-            'stopBits': 1
+            'stopbits': 1
         }
         self.callback = callback
         self.row = 0

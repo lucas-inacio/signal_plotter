@@ -40,21 +40,37 @@ class MainFrame(tk.Frame):
         self.curve.grid()
 
     def onComSettings(self, comsettings):
-        print(comsettings)
+        parity = serial.PARITY_EVEN
+        if comsettings['parity'] == 'Nenhuma':
+            parity = serial.PARITY_NONE
+        elif comsettings['parity'] == 'Ímpar':
+            parity = serial.PARITY_ODD
+        else:
+            parity = serial.PARITY_EVEN
+
+        self.serialPort = serial.Serial()
+        self.serialPort.port = comsettings['port']
+        self.serialPort.baudrate = int(comsettings['baudrate'])
+        self.serialPort.parity = parity
+        self.serialPort.stopbits = int(comsettings['stopbits'])
+        self.serialPort.timeout = 0.01
+        self.serialPort.open()
         
     def startCapture(self):
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
+        if self.serialPort.is_open:
+            self.master.after(100, self.logLoop)
         
     def logLoop(self):
-        pass
+        print('Yeah')
+        self.master.after(100, self.logLoop)
 
     def openFile(self):
         filename = filedialog.askopenfilename(
             filetypes=[("Arquivos de texto", ".txt")])
         if filename:
             pass
-                    
-        
+  
 root = tk.Tk()
 root.option_add('*tearOff', False)
 app = MainFrame(master=root)
