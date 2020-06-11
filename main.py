@@ -62,5 +62,6 @@ class MainFrame(tk.Frame):
                     
         
 root = tk.Tk()
+root.option_add('*tearOff', False)
 app = MainFrame(master=root)
 app.mainloop()
