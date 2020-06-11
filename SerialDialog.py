@@ -49,7 +49,6 @@ class SerialDialog(tk.simpledialog.Dialog):
                 'Paridade', ['Nenhuma', 'Ímpar', 'Par'])
             self.stopBits = self.createOptionMenu('Bits de parada', [1, 2])
 
-    
     def apply(self):
         self.comsettings['port'] = self.port.get()
         if self.callback: self.callback(self.comsettings)
