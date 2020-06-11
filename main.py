@@ -32,17 +32,13 @@ class MainFrame(tk.Frame):
         self.serialPort = SerialPort.SerialPort()
 
     def onComSettings(self, comsettings):
-        parity = 'N'
-        if comsettings['parity'] == 'Ímpar':
-            parity = 'O'
-        elif comsettings['parity'] == 'Par':
-            parity = 'E'
-
         if self.serialPort.isOpen():
             self.serialPort.close()
+        print(comsettings)
         self.serialPort.begin(port=comsettings['port'],
                               baudrate=comsettings['baudrate'],
-                              parity=parity,
+                              bytesize=comsettings['bytesize'],
+                              parity=comsettings['parity'],
                               stopbits=comsettings['stopbits'])
         
     def startCapture(self):

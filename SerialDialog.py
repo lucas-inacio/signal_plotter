@@ -5,6 +5,7 @@ Created on Tue Jun  9 16:41:30 2020
 @author: Lucas Viegas
 """
 
+import serial
 import SerialPort
 import tkinter as tk
 
@@ -13,7 +14,8 @@ class SerialDialog(tk.simpledialog.Dialog):
     def __init__(self, master=None, title='None', callback=None):
         self.comsettings = {
             'port': '',
-            'baudrate': '9600',
+            'baudrate': 9600,
+            'bytesize': 8,
             'parity': 'Nenhuma',     # None, Even, Odd
             'stopbits': 1
         }
@@ -39,15 +41,46 @@ class SerialDialog(tk.simpledialog.Dialog):
         if (len(ports) > 0):
             serialTemp = SerialPort.SerialPort()
             self.port = self.createOptionMenu('Porta', ports)
-            self.bauRate = self.createOptionMenu(
-                'Baud', serialTemp.getBaudRates(), 3)
+            self.baudrate = self.createOptionMenu(
+                'Baud', serialTemp.getBaudRates(), 12)
+            self.bytesize = self.createOptionMenu(
+                'Byte size', serialTemp.getByteSizes(), 3)
             self.parity = self.createOptionMenu(
                 'Paridade', ['Nenhuma', 'Ímpar', 'Par'])
-            self.stopBits = self.createOptionMenu(
+            self.stopbits = self.createOptionMenu(
                 'Bits de parada', serialTemp.getStopBits())
 
     def apply(self):
         self.comsettings['port'] = self.port.get()
+        self.comsettings['baudrate'] = self.baudrate.get()
+        self.comsettings['bytesize'] = self.bytesize.get()
+        self.comsettings['parity'] = self.parity.get()
+        self.comsettings['stopbits'] = self.stopbits.get()
+
+        # Corrige valores para que a serial possa entender
+        parity = 'N'
+        if self.comsettings['parity'] == 'Ímpar':
+            parity = 'O'
+        elif self.comsettings['parity'] == 'Par':
+            parity = 'E'
+        self.comsettings['parity'] = parity
+
+        stopbits = serial.STOPBITS_ONE
+        if self.comsettings['stopbits'] == '1.5':
+            stopbits = serial.STOPBITS_ONE_POINT_FIVE
+        elif self.comsettings['stopbits'] == '2':
+            stopbits = serial.STOPBITS_TWO
+        self.comsettings['stopbits'] = stopbits
+
+        bytesize = serial.EIGHTBITS
+        if self.comsettings['bytesize'] == '5':
+            bytesize = serial.FIVEBITS
+        elif self.comsettings['bytesize'] == '6':
+            bytesize = serial.SIXBITS
+        elif self.comsettings['bytesize'] == '7':
+            bytesize = serial.SEVENBITS
+        self.comsettings['bytesize'] = bytesize
+
         if self.callback: self.callback(self.comsettings)
 
 
