@@ -48,7 +48,7 @@ class MainFrame(tk.Frame):
     def logLoop(self):
         pass
 
-    def openFile(selef):
+    def openFile(self):
         filename = filedialog.askopenfilename(
             filetypes=[("Arquivos de texto", ".txt")])
         if filename:
