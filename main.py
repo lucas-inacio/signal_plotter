@@ -60,7 +60,9 @@ class MainFrame(tk.Frame):
         
     def logLoop(self):
         if self.serialPort.is_open:
-            self.serialPort.read() # Pode fornecer o número de bytes como argumento
+            bytes = self.serialPort.read() # Pode fornecer o número de bytes como argumento
+            if bytes:
+                print(bytes)
         else:
             return
         self.master.after(100, self.logLoop)

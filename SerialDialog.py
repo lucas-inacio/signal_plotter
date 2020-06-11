@@ -5,8 +5,7 @@ Created on Tue Jun  9 16:41:30 2020
 @author: Lucas Viegas
 """
 
-from serial.tools import list_ports
-import serial
+import SerialPort
 import tkinter as tk
 
 
@@ -36,18 +35,16 @@ class SerialDialog(tk.simpledialog.Dialog):
     def body(self, master):
         self.frame = tk.Frame(self)
         self.frame.pack()
-        ports = serial.tools.list_ports.comports()
+        ports = SerialPort.GetPortsList()
         if (len(ports) > 0):
-            ports_list = []
-            for i in range(0, len(ports)):
-                ports_list.append(ports[i].device)
-            self.port = self.createOptionMenu('Porta', ports_list)
-
-            bauds = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
-            self.bauRate = self.createOptionMenu('Baud', bauds, 3)
+            serialTemp = SerialPort.SerialPort()
+            self.port = self.createOptionMenu('Porta', ports)
+            self.bauRate = self.createOptionMenu(
+                'Baud', serialTemp.getBaudRates(), 3)
             self.parity = self.createOptionMenu(
                 'Paridade', ['Nenhuma', 'Ímpar', 'Par'])
-            self.stopBits = self.createOptionMenu('Bits de parada', [1, 2])
+            self.stopBits = self.createOptionMenu(
+                'Bits de parada', serialTemp.getStopBits())
 
     def apply(self):
         self.comsettings['port'] = self.port.get()
