@@ -29,13 +29,19 @@ class MainFrame(tk.Frame):
         self.grid()
         
         # Menu
-        self.menuButton = tk.Menubutton(self, text="Arquivo")
-        self.menuButton.grid(column=0, row=0)
+        # self.menuButton = tk.Menubutton(self, text="Arquivo")
+        # self.menuButton.grid(column=0, row=0)
         
-        self.menuButton.menu = tk.Menu(self.menuButton)
-        self.menuButton["menu"] = self.menuButton.menu
-        self.menuButton.menu.add_command(label="Iniciar captura",
-                                         command=self.startCapture)
+        # self.menuButton.menu = tk.Menu(self.menuButton)
+        # self.menuButton["menu"] = self.menuButton.menu
+        # self.menuButton.menu.add_command(label="Iniciar captura",
+        #                                  command=self.startCapture)
+        self.menubar = tk.Menu(self)
+        self.master['menu'] = self.menubar
+        menu_file = tk.Menu(self.menubar)
+        self.menubar.add_cascade(menu=menu_file, label='Arquivo')
+        menu_file.add_command(label='Abrir', command=self.openFile)
+        menu_file.add_command(label='Iniciar captura', command=self.startCapture)
         
         # Curva
         self.curve = CurveWindow(self)
@@ -54,7 +60,7 @@ class MainFrame(tk.Frame):
     def logLoop(self):
         pass
 
-    def saveFile(selef):
+    def openFile(selef):
         filename = filedialog.askopenfilename(
             filetypes=[("Arquivos de texto", ".txt")])
         if filename:
