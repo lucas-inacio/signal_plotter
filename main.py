@@ -5,13 +5,9 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import asyncio
-import random
-import serial
+import SerialPort
 import tkinter as tk
 from tkinter import filedialog
-import numpy as np
-import time
 
 # Parte do projeto
 from CurveWindow import CurveWindow    
@@ -33,36 +29,32 @@ class MainFrame(tk.Frame):
         # Curva
         self.curve = CurveWindow(self)
         self.curve.grid()
-        self.serialPort = serial.Serial()
+        self.serialPort = SerialPort.SerialPort()
 
     def onComSettings(self, comsettings):
-        parity = serial.PARITY_EVEN
-        if comsettings['parity'] == 'Nenhuma':
-            parity = serial.PARITY_NONE
-        elif comsettings['parity'] == 'Ímpar':
-            parity = serial.PARITY_ODD
-        else:
-            parity = serial.PARITY_EVEN
+        parity = 'N'
+        if comsettings['parity'] == 'Ímpar':
+            parity = 'O'
+        elif comsettings['parity'] == 'Par':
+            parity = 'E'
 
-        if self.serialPort.is_open:
+        if self.serialPort.isOpen():
             self.serialPort.close()
-        self.serialPort.port = comsettings['port']
-        self.serialPort.baudrate = int(comsettings['baudrate'])
-        self.serialPort.parity = parity
-        self.serialPort.stopbits = int(comsettings['stopbits'])
-        self.serialPort.timeout = 0.01
-        self.serialPort.open()
+        self.serialPort.begin(port=comsettings['port'],
+                              baudrate=comsettings['baudrate'],
+                              parity=parity,
+                              stopbits=comsettings['stopbits'])
         
     def startCapture(self):
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
-        if self.serialPort.is_open:
+        if self.serialPort.isOpen():
             self.master.after(100, self.logLoop)
         
     def logLoop(self):
-        if self.serialPort.is_open:
-            bytes = self.serialPort.read() # Pode fornecer o número de bytes como argumento
-            if bytes:
-                print(bytes)
+        if self.serialPort.isOpen():
+            if self.serialPort.available() > 1:
+                valor = self.serialPort.readUint16()
+                print(valor)
         else:
             return
         self.master.after(100, self.logLoop)
