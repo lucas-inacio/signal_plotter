@@ -28,14 +28,6 @@ class MainFrame(tk.Frame):
         self.master = master
         self.grid()
         
-        # Menu
-        # self.menuButton = tk.Menubutton(self, text="Arquivo")
-        # self.menuButton.grid(column=0, row=0)
-        
-        # self.menuButton.menu = tk.Menu(self.menuButton)
-        # self.menuButton["menu"] = self.menuButton.menu
-        # self.menuButton.menu.add_command(label="Iniciar captura",
-        #                                  command=self.startCapture)
         self.menubar = tk.Menu(self)
         self.master['menu'] = self.menubar
         menu_file = tk.Menu(self.menubar)
@@ -51,10 +43,6 @@ class MainFrame(tk.Frame):
         print(comsettings)
         
     def startCapture(self):
-        #filename = filedialog.askopenfilename(
-        #    filetypes=[("Arquivos de áudio", ".wav")])
-        #if filename:
-        #    pass
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
         
     def logLoop(self):
