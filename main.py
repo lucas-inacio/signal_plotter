@@ -17,11 +17,6 @@ import time
 from CurveWindow import CurveWindow    
 from SerialDialog import SerialDialog
 
-async def getSample(lock):
-    await asyncio.sleep(1)
-    value = random.randint(0, 1023)
-    return value
-
 class MainFrame(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
