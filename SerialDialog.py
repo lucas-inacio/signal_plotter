@@ -49,6 +49,10 @@ class SerialDialog(tk.simpledialog.Dialog):
                 'Paridade', ['Nenhuma', 'Ímpar', 'Par'])
             self.stopbits = self.createOptionMenu(
                 'Bits de parada', serialTemp.getStopBits())
+            self.text = tk.Entry(self.frame)
+            self.text.grid(row=5, column=0, padx=5)
+            self.buttonFile = tk.Button(self.frame, text='Salvar como')
+            self.buttonFile.grid(row=5, column=1, padx=5)
 
     def apply(self):
         self.comsettings['port'] = self.port.get()
@@ -81,6 +85,6 @@ class SerialDialog(tk.simpledialog.Dialog):
             bytesize = serial.SEVENBITS
         self.comsettings['bytesize'] = bytesize
 
-        if self.callback: self.callback(self.comsettings)
+        if self.callback: self.callback(self.comsettings, self.text.get())
 
 

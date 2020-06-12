@@ -6,11 +6,13 @@ This is a temporary script file.
 """
 
 from datetime import datetime
+from pathvalidate import ValidationError, validate_filename
 from tkinter import filedialog
 import tkinter as tk
 
 # Parte do projeto
-from CurveWindow import CurveWindow    
+from CurveWindow import CurveWindow  
+from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
 import SerialPort
 
@@ -63,14 +65,18 @@ class MainFrame(tk.Frame):
         self.ydata = self.ydata[-60:]
         self.curve.setData(self.xdata, self.ydata)
 
-    def onComSettings(self, comsettings):
-        if self.serialPort.isOpen():
-            self.serialPort.close()
-        self.serialPort.begin(port=comsettings['port'],
-                              baudrate=comsettings['baudrate'],
-                              bytesize=comsettings['bytesize'],
-                              parity=comsettings['parity'],
-                              stopbits=comsettings['stopbits'])
+    def onComSettings(self, comsettings, filePath):
+        try:
+            validate_filename(filePath)
+            if self.serialPort.isOpen():
+                self.serialPort.close()
+            self.serialPort.begin(port=comsettings['port'],
+                                baudrate=comsettings['baudrate'],
+                                bytesize=comsettings['bytesize'],
+                                parity=comsettings['parity'],
+                                stopbits=comsettings['stopbits'])
+        except ValidationError as e:
+            tk.messagebox.showerror('Erro de arquivo', 'Caminho inválido')
         
     def startCapture(self):
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
