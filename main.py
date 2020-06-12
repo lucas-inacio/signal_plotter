@@ -6,7 +6,7 @@ This is a temporary script file.
 """
 
 from datetime import datetime
-from pathvalidate import ValidationError, validate_filename
+from pathvalidate import ValidationError, sanitize_filepath
 from tkinter import filedialog
 import tkinter as tk
 
@@ -67,7 +67,7 @@ class MainFrame(tk.Frame):
 
     def onComSettings(self, comsettings, filePath):
         try:
-            validate_filename(filePath)
+            sanitize_filepath(filePath, platform='auto')
             if self.serialPort.isOpen():
                 self.serialPort.close()
             self.serialPort.begin(port=comsettings['port'],
