@@ -29,6 +29,7 @@ class MainFrame(tk.Frame):
         self.menubar.add_cascade(menu=menu_file, label='Arquivo')
         menu_file.add_command(label='Abrir', command=self.openFile)
         menu_file.add_command(label='Iniciar captura', command=self.startCapture)
+        self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
         # Aquisição
         self.serialPort = SerialPort.SerialPort()
@@ -41,6 +42,7 @@ class MainFrame(tk.Frame):
         self.ratio = 1
 
         # Arquivo
+        self.fileTask = None
         self.file = None
         self.fileName = None
         self.dataQueue = None
@@ -70,6 +72,9 @@ class MainFrame(tk.Frame):
         self.xdata = self.xdata[-60:]
         self.ydata = self.ydata[-60:]
         self.curve.setData(self.xdata, self.ydata)
+        
+        # Envia para o arquivo
+        self.dataQueue.put([self.timeElapsed, y])
 
     def onComSettings(self, comsettings, filePath):
         try:
@@ -99,9 +104,14 @@ class MainFrame(tk.Frame):
         self.fileTask.start()
     
     def closeFile(self):
-        self.fileTask.shouldRun = False
-        self.fileTask.join()
+        if self.fileTask:
+            self.fileTask.shouldRun = False
+            self.fileTask.join()
         
+    def closeWindow(self):
+        self.closeFile()
+        self.master.destroy()
+
     def getSample(self):
         if self.serialPort.isOpen():
             if self.serialPort.available() > 1:
