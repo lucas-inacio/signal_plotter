@@ -105,7 +105,6 @@ class MainFrame(tk.Frame):
         self.file = open(self.filePath, 'a', newline='')
         self.dataQueue = queue.Queue()
         self.fileTask = FileWriter(self.file, self.dataQueue)
-        self.fileTask.shouldRun = True
         self.fileTask.start()
 
     def stopCapture(self):
@@ -117,7 +116,7 @@ class MainFrame(tk.Frame):
     
     def closeFile(self):
         if self.fileTask:
-            self.fileTask.shouldRun = False
+            self.dataQueue.put(None)
             self.fileTask.join()
         
     def closeWindow(self):

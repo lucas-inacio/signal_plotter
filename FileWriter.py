@@ -11,10 +11,10 @@ class FileWriter(threading.Thread):
         self.dataQueue = dataQueue
 
     def run(self):
-        currentThread = threading.currentThread()
-        while getattr(currentThread, 'shouldRun', True):
+        while True:
             try:
                 data = self.dataQueue.get(timeout=0.1)
+                if data == None: break
                 self.writer.writerow(data)
             except queue.Empty:
                 pass
