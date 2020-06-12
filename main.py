@@ -88,7 +88,7 @@ class MainFrame(tk.Frame):
                                 parity=comsettings['parity'],
                                 stopbits=comsettings['stopbits'])
             self.filePath = filePath
-        except ValidationError as e:
+        except ValidationError:
             tk.messagebox.showerror('Erro de arquivo', 'Caminho inválido')
         
     def startCapture(self):
