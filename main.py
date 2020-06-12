@@ -97,7 +97,7 @@ class MainFrame(tk.Frame):
         if self.serialPort.isOpen():
             self.master.after(100, self.getSample)
 
-        self.file = open(self.filePath, 'w')
+        self.file = open(self.filePath, 'w', newline='')
         self.dataQueue = queue.Queue()
         self.fileTask = FileWriter(self.file, self.dataQueue)
         self.fileTask.shouldRun = True
