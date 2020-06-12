@@ -7,6 +7,7 @@ This is a temporary script file.
 
 from datetime import datetime
 from pathvalidate import ValidationError, sanitize_filepath
+import queue
 from tkinter import filedialog
 import tkinter as tk
 
@@ -38,6 +39,11 @@ class MainFrame(tk.Frame):
         self.max = 1023
         self.fullScale = 5
         self.ratio = 1
+
+        # Arquivo
+        self.file = None
+        self.fileName = None
+        self.dataQueue = None
 
         # Curva
         self.curve = CurveWindow(self)
@@ -75,6 +81,7 @@ class MainFrame(tk.Frame):
                                 bytesize=comsettings['bytesize'],
                                 parity=comsettings['parity'],
                                 stopbits=comsettings['stopbits'])
+            self.filePath = filePath
         except ValidationError as e:
             tk.messagebox.showerror('Erro de arquivo', 'Caminho inválido')
         
@@ -84,6 +91,16 @@ class MainFrame(tk.Frame):
         self.timeElapsed = 0
         if self.serialPort.isOpen():
             self.master.after(100, self.getSample)
+
+        self.file = open(self.filePath, 'w')
+        self.dataQueue = queue.Queue()
+        self.fileTask = FileWriter(self.file, self.dataQueue)
+        self.fileTask.shouldRun = True
+        self.fileTask.start()
+    
+    def closeFile(self):
+        self.fileTask.shouldRun = False
+        self.fileTask.join()
         
     def getSample(self):
         if self.serialPort.isOpen():

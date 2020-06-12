@@ -51,8 +51,11 @@ class SerialDialog(tk.simpledialog.Dialog):
                 'Bits de parada', serialTemp.getStopBits())
             self.text = tk.Entry(self.frame)
             self.text.grid(row=5, column=0, padx=5)
-            self.buttonFile = tk.Button(self.frame, text='Salvar como')
+            self.buttonFile = tk.Button(self.frame, text='Salvar como', command=self.setPath)
             self.buttonFile.grid(row=5, column=1, padx=5)
+
+    def setPath(self):
+        self.text.insert(0, tk.filedialog.asksaveasfilename())
 
     def apply(self):
         self.comsettings['port'] = self.port.get()
