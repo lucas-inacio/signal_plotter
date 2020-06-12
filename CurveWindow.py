@@ -41,6 +41,9 @@ class CurveWindow(tk.Frame):
         self.canvas.mpl_connect("key_press_event", self.handleKey)
         self.canvas.mpl_connect("key_release_event", self.handleKey)
         self.canvas.mpl_connect("figure_enter_event", self.eventHandler)
+
+    def getData(self):
+        return (self.data.get_xdata(), self.data.get_ydata())
         
     def setData(self, x, y):
         self.data.set_xdata(x)
