@@ -93,6 +93,10 @@ class MainFrame(tk.Frame):
         
     def startCapture(self):
         SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
+        if self.filePath == '':
+            tk.messagebox.showerror('Erro de arquivo', 'Escolha um nome para o arquivo')
+            return
+            
         self.lastTime = datetime.now()
         self.timeElapsed = 0
         if self.serialPort.isOpen():
