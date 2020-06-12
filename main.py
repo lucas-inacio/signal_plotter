@@ -29,6 +29,7 @@ class MainFrame(tk.Frame):
         self.menubar.add_cascade(menu=menu_file, label='Arquivo')
         menu_file.add_command(label='Abrir', command=self.openFile)
         menu_file.add_command(label='Iniciar captura', command=self.startCapture)
+        menu_file.add_command(label='Parar captura', command=self.stopCapture)
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
         # Aquisição
@@ -97,11 +98,16 @@ class MainFrame(tk.Frame):
         if self.serialPort.isOpen():
             self.master.after(100, self.getSample)
 
-        self.file = open(self.filePath, 'w', newline='')
+        self.file = open(self.filePath, 'a', newline='')
         self.dataQueue = queue.Queue()
         self.fileTask = FileWriter(self.file, self.dataQueue)
         self.fileTask.shouldRun = True
         self.fileTask.start()
+
+    def stopCapture(self):
+        if self.serialPort.isOpen():
+            self.serialPort.close()
+        self.closeFile()
     
     def closeFile(self):
         if self.fileTask:
