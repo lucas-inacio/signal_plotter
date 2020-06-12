@@ -108,6 +108,8 @@ class MainFrame(tk.Frame):
         if self.serialPort.isOpen():
             self.serialPort.close()
         self.closeFile()
+        self.xdata = []
+        self.ydata = []
     
     def closeFile(self):
         if self.fileTask:
