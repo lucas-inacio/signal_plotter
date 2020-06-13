@@ -12,7 +12,8 @@ from tkinter import filedialog
 import tkinter as tk
 
 # Parte do projeto
-from CurveWindow import CurveWindow  
+from CurveWindow import CurveWindow
+from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
 import SerialPort
@@ -48,7 +49,7 @@ class MainFrame(tk.Frame):
         self.fileName = None
 
         # Curva
-        self.curve = CurveWindow(self)
+        self.curve = SamplingWindow(self)
         self.curve.grid()
         self.curve.setXLabel('Tempo (s)')
         self.curve.setYLabel('Tensão (V)')
@@ -60,18 +61,10 @@ class MainFrame(tk.Frame):
         delta = now - self.lastTime
         self.lastTime = now
         self.timeElapsed = self.timeElapsed + delta.total_seconds()
-        left, right = self.curve.getXLimit()
-
-        if self.timeElapsed > right:
-            self.curve.setXLimit(self.timeElapsed - (right - left), self.timeElapsed)
 
         # Converte o valor amostrado
         valor = (self.fullScale / self.max) * y * self.ratio
-        self.xdata.append(self.timeElapsed)
-        self.ydata.append(valor)
-        self.xdata = self.xdata[-60:]
-        self.ydata = self.ydata[-60:]
-        self.curve.setData(self.xdata, self.ydata)
+        self.curve.addSample(self.timeElapsed, valor)
         
         # Envia para o arquivo
         self.fileTask.write([self.timeElapsed, y])
