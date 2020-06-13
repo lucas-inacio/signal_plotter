@@ -55,7 +55,7 @@ class MainFrame(tk.Frame):
             self.serialPort.close()
         # Abre arquivo e inicia thread para escrita
         self.filePath = filePath
-        self.file = open(self.filePath, 'a', newline='')
+        self.file = open(self.filePath, 'w', newline='')
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
