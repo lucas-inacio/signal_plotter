@@ -46,7 +46,7 @@ class MainFrame(tk.Frame):
         # Arquivo
         self.fileTask = None
         self.file = None
-        self.fileName = None
+        self.filePath = ''
 
         # Curva
         self.curve = SamplingWindow(self)
