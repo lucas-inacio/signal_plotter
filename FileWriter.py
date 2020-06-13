@@ -34,6 +34,7 @@ class FileWriter(threading.Thread):
 
     def join(self):
         self.dataQueue.put(None)
+        self.dataQueue.join()
         super().join()
 
     def write(self, data):
