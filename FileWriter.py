@@ -20,6 +20,7 @@ class FileWriter(threading.Thread):
                 data = self.dataQueue.get(timeout=0.1)
                 if data == None: break
                 self.writer.writerow(data)
+                self.dataQueue.task_done()
             except queue.Empty:
                 pass
             # Aplica alterações no arquivo após autoSaveTimeout segundos
@@ -29,6 +30,7 @@ class FileWriter(threading.Thread):
                 self.file.flush()
                 self.lastTimestamp = now
         self.file.flush()
+        self.dataQueue.task_done()
 
     def join(self):
         self.dataQueue.put(None)
