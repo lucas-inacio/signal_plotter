@@ -8,6 +8,7 @@ from tkinter import filedialog
 import tkinter as tk
 
 # Parte do projeto
+from DataLogger import CSVLogger, XLSLogger
 from Sampler import Sampler
 from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
@@ -55,7 +56,7 @@ class MainFrame(tk.Frame):
             self.serialPort.close()
         # Abre arquivo e inicia thread para escrita
         self.filePath = filePath
-        self.file = open(self.filePath, 'w', newline='')
+        self.file = XLSLogger(self.filePath)
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 

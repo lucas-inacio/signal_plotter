@@ -8,7 +8,6 @@ class FileWriter(threading.Thread):
     def __init__(self, file, autoSaveTimeout=300):
         super().__init__()
         self.file = file
-        self.writer = csv.writer(self.file)
         self.dataQueue = queue.Queue()
         self.lastTimestamp = 0
         self.autoSaveTimeout = autoSaveTimeout
@@ -19,7 +18,7 @@ class FileWriter(threading.Thread):
             try:
                 data = self.dataQueue.get(timeout=0.1)
                 if data == None: break
-                self.writer.writerow(data)
+                self.file.write(data)
                 self.dataQueue.task_done()
             except queue.Empty:
                 pass
