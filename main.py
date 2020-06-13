@@ -46,7 +46,6 @@ class MainFrame(tk.Frame):
         self.fileTask = None
         self.file = None
         self.fileName = None
-        self.dataQueue = None
 
         # Curva
         self.curve = CurveWindow(self)
@@ -75,7 +74,7 @@ class MainFrame(tk.Frame):
         self.curve.setData(self.xdata, self.ydata)
         
         # Envia para o arquivo
-        self.dataQueue.put([self.timeElapsed, y])
+        self.fileTask.write([self.timeElapsed, y])
 
     def onComSettings(self, comsettings, filePath):
         try:
@@ -105,8 +104,7 @@ class MainFrame(tk.Frame):
 
         # Abre arquivo e inicia thread para escrita
         self.file = open(self.filePath, 'a', newline='')
-        self.dataQueue = queue.Queue()
-        self.fileTask = FileWriter(self.file, self.dataQueue)
+        self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
         # Reinicia gráfico
@@ -121,7 +119,6 @@ class MainFrame(tk.Frame):
     
     def closeFile(self):
         if self.fileTask:
-            self.dataQueue.put(None)
             self.fileTask.join()
         self.file.close()
         

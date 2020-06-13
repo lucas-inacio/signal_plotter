@@ -5,11 +5,11 @@ import threading
 
 
 class FileWriter(threading.Thread):
-    def __init__(self, file, dataQueue, autoSaveTimeout=300):
+    def __init__(self, file, autoSaveTimeout=300):
         super().__init__()
         self.file = file
         self.writer = csv.writer(self.file)
-        self.dataQueue = dataQueue
+        self.dataQueue = queue.Queue()
         self.lastTimestamp = 0
         self.autoSaveTimeout = autoSaveTimeout
 
@@ -29,3 +29,10 @@ class FileWriter(threading.Thread):
                 self.file.flush()
                 self.lastTimestamp = now
         self.file.flush()
+
+    def join(self):
+        self.dataQueue.put(None)
+        super().join()
+
+    def write(self, data):
+        self.dataQueue.put(data)
