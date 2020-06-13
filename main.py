@@ -113,7 +113,10 @@ class MainFrame(tk.Frame):
     def closeFile(self):
         if self.fileTask:
             self.fileTask.join()
-        self.file.close()
+            self.fileTask = None
+        if self.file:
+            self.file.close()
+            self.file = None
         
     def closeWindow(self):
         self.closeFile()
