@@ -102,7 +102,7 @@ class MainFrame(tk.Frame):
         self.timeElapsed = 0
         if self.serialPort.isOpen():
             self.master.after(100, self.getSample)
-            
+
         # Abre arquivo e inicia thread para escrita
         self.file = open(self.filePath, 'a', newline='')
         self.dataQueue = queue.Queue()
@@ -123,6 +123,7 @@ class MainFrame(tk.Frame):
         if self.fileTask:
             self.dataQueue.put(None)
             self.fileTask.join()
+        self.file.close()
         
     def closeWindow(self):
         self.closeFile()

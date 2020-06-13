@@ -19,4 +19,3 @@ class FileWriter(threading.Thread):
             except queue.Empty:
                 pass
         self.file.flush()
-        self.file.close()
