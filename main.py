@@ -97,22 +97,27 @@ class MainFrame(tk.Frame):
             tk.messagebox.showerror('Erro de arquivo', 'Escolha um nome para o arquivo')
             return
             
+        # Inicia aquisição
         self.lastTime = datetime.now()
         self.timeElapsed = 0
         if self.serialPort.isOpen():
             self.master.after(100, self.getSample)
-
+            
+        # Abre arquivo e inicia thread para escrita
         self.file = open(self.filePath, 'a', newline='')
         self.dataQueue = queue.Queue()
         self.fileTask = FileWriter(self.file, self.dataQueue)
         self.fileTask.start()
 
+        # Reinicia gráfico
+        self.xdata = []
+        self.ydata = []
+        self.curve.setXLimit(0, 10)
+
     def stopCapture(self):
         if self.serialPort.isOpen():
             self.serialPort.close()
         self.closeFile()
-        self.xdata = []
-        self.ydata = []
     
     def closeFile(self):
         if self.fileTask:
