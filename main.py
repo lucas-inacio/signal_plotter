@@ -4,15 +4,11 @@ Spyder Editor
 
 This is a temporary script file.
 """
-
-from datetime import datetime
-from pathvalidate import ValidationError, sanitize_filepath
-import queue
 from tkinter import filedialog
 import tkinter as tk
 
 # Parte do projeto
-from CurveWindow import CurveWindow
+from Sampler import Sampler
 from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
@@ -29,19 +25,13 @@ class MainFrame(tk.Frame):
         menu_file = tk.Menu(self.menubar)
         self.menubar.add_cascade(menu=menu_file, label='Arquivo')
         menu_file.add_command(label='Abrir', command=self.openFile)
-        menu_file.add_command(label='Iniciar captura', command=self.startCapture)
+        menu_file.add_command(label='Iniciar captura', command=self.startComDialog)
         menu_file.add_command(label='Parar captura', command=self.stopCapture)
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
         # Aquisição
         self.serialPort = SerialPort.SerialPort()
-        self.lastTime = 0
-        self.timeElapsed = 0
-        self.xdata = []
-        self.ydata = []
-        self.max = 1023
-        self.fullScale = 5
-        self.ratio = 1
+        self.sampler = Sampler(self.serialPort)
 
         # Arquivo
         self.fileTask = None
@@ -54,47 +44,34 @@ class MainFrame(tk.Frame):
         self.curve.setXLabel('Tempo (s)')
         self.curve.setYLabel('Tensão (V)')
         self.curve.setXLimit(0, 10)
-        self.curve.setYLimit(0, self.fullScale + 1)
+        self.curve.setYLimit(0, 6)
 
-    def updateCurve(self, y):
-        now = datetime.now()
-        delta = now - self.lastTime
-        self.lastTime = now
-        self.timeElapsed = self.timeElapsed + delta.total_seconds()
+    def updateCurve(self, x, y):
+        self.curve.addSample(x, y)
+        self.fileTask.write([x, y])
 
-        # Converte o valor amostrado
-        valor = (self.fullScale / self.max) * y * self.ratio
-        self.curve.addSample(self.timeElapsed, valor)
-        
-        # Envia para o arquivo
-        self.fileTask.write([self.timeElapsed, y])
-
-    def onComSettings(self, comsettings, filePath):
+    def startCapture(self, comsettings, filePath):
         if self.serialPort.isOpen():
             self.serialPort.close()
-        self.serialPort.begin(port=comsettings['port'],
-                            baudrate=comsettings['baudrate'],
-                            bytesize=comsettings['bytesize'],
-                            parity=comsettings['parity'],
-                            stopbits=comsettings['stopbits'])
-        self.filePath = filePath
-        
-        # Inicia aquisição
-        self.lastTime = datetime.now()
-        self.timeElapsed = 0
-        if self.serialPort.isOpen():
-            self.master.after(100, self.getSample)
-
         # Abre arquivo e inicia thread para escrita
+        self.filePath = filePath
         self.file = open(self.filePath, 'a', newline='')
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
+        self.serialPort.begin(port=comsettings['port'],
+                              baudrate=comsettings['baudrate'],
+                              bytesize=comsettings['bytesize'],
+                              parity=comsettings['parity'],
+                              stopbits=comsettings['stopbits'])
+        self.sampler.reset()
+        self.sampleLoop()
+
         # Reinicia gráfico
         self.curve.restart()
         
-    def startCapture(self):
-        SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
+    def startComDialog(self):
+        SerialDialog(self, title='Configurações de captura', callback=self.startCapture)
 
     def stopCapture(self):
         if self.serialPort.isOpen():
@@ -113,12 +90,11 @@ class MainFrame(tk.Frame):
         self.closeFile()
         self.master.destroy()
 
-    def getSample(self):
+    def sampleLoop(self):
         if self.serialPort.isOpen():
-            if self.serialPort.available() > 1:
-                valor = self.serialPort.readUint16()
-                self.updateCurve(valor)
-            self.master.after(100, self.getSample)
+            sample = self.sampler.getSample()
+            if sample : self.updateCurve(sample[0], sample[1])
+            self.master.after(100, self.sampleLoop)
 
     def openFile(self):
         filename = filedialog.askopenfilename(
@@ -128,7 +104,7 @@ class MainFrame(tk.Frame):
 
 def main():
     root = tk.Tk()
-    root.option_add('*tearOff', False)
+    root.option_add('*tearOff', False) # Impede que o menu seja destacado da janela principal
     app = MainFrame(master=root)
     app.mainloop()
 
