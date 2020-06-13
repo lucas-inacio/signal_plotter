@@ -70,25 +70,15 @@ class MainFrame(tk.Frame):
         self.fileTask.write([self.timeElapsed, y])
 
     def onComSettings(self, comsettings, filePath):
-        try:
-            sanitize_filepath(filePath, platform='auto')
-            if self.serialPort.isOpen():
-                self.serialPort.close()
-            self.serialPort.begin(port=comsettings['port'],
-                                baudrate=comsettings['baudrate'],
-                                bytesize=comsettings['bytesize'],
-                                parity=comsettings['parity'],
-                                stopbits=comsettings['stopbits'])
-            self.filePath = filePath
-        except ValidationError:
-            tk.messagebox.showerror('Erro de arquivo', 'Caminho inválido')
+        if self.serialPort.isOpen():
+            self.serialPort.close()
+        self.serialPort.begin(port=comsettings['port'],
+                            baudrate=comsettings['baudrate'],
+                            bytesize=comsettings['bytesize'],
+                            parity=comsettings['parity'],
+                            stopbits=comsettings['stopbits'])
+        self.filePath = filePath
         
-    def startCapture(self):
-        SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
-        if self.filePath == '':
-            tk.messagebox.showerror('Erro de arquivo', 'Escolha um nome para o arquivo')
-            return
-            
         # Inicia aquisição
         self.lastTime = datetime.now()
         self.timeElapsed = 0
@@ -102,6 +92,9 @@ class MainFrame(tk.Frame):
 
         # Reinicia gráfico
         self.curve.restart()
+        
+    def startCapture(self):
+        SerialDialog(self, title='Configurações de captura', callback=self.onComSettings)
 
     def stopCapture(self):
         if self.serialPort.isOpen():

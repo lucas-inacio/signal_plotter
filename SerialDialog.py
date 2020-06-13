@@ -5,8 +5,10 @@ Created on Tue Jun  9 16:41:30 2020
 @author: Lucas Viegas
 """
 
+from pathvalidate import ValidationError, validate_filepath
 import serial
 import SerialPort
+import sys
 import tkinter as tk
 
 
@@ -57,7 +59,7 @@ class SerialDialog(tk.simpledialog.Dialog):
     def setPath(self):
         self.text.insert(0, tk.filedialog.asksaveasfilename())
 
-    def apply(self):
+    def validate(self):
         self.comsettings['port'] = self.port.get()
         self.comsettings['baudrate'] = self.baudrate.get()
         self.comsettings['bytesize'] = self.bytesize.get()
@@ -88,6 +90,18 @@ class SerialDialog(tk.simpledialog.Dialog):
             bytesize = serial.SEVENBITS
         self.comsettings['bytesize'] = bytesize
 
-        if self.callback: self.callback(self.comsettings, self.text.get())
+        filePath = self.text.get()
+        resultado = False
+        try:
+            validate_filepath(filePath, platform='auto')
+            resultado = True
+        except ValidationError:
+            tk.messagebox.showerror('Erro de arquivo', 'Caminho inválido')
+            resultado = False
+        return resultado
+
+    def apply(self):
+        if self.callback:
+            self.callback(self.comsettings, self.text.get())
 
 
