@@ -101,9 +101,7 @@ class MainFrame(tk.Frame):
         self.fileTask.start()
 
         # Reinicia gráfico
-        self.xdata = []
-        self.ydata = []
-        self.curve.setXLimit(0, 10)
+        self.curve.restart()
 
     def stopCapture(self):
         if self.serialPort.isOpen():

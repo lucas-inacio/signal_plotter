@@ -18,3 +18,12 @@ class SamplingWindow(CurveWindow):
         self.xdata = self.xdata[-self.maxSamples:]
         self.ydata = self.ydata[-self.maxSamples:]
         self.setData(self.xdata, self.ydata)
+
+    def restart(self):
+        self.xdata = []
+        self.ydata = []
+        left, right = self.getXLimit()
+        self.setXLimit(0, right - left)
+        bottom, top = self.getYLimit()
+        self.setYLimit(0, top - bottom)
+        self.setData(self.xdata, self.ydata)
