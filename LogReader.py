@@ -43,8 +43,9 @@ class XLSReader(LogReader):
     def read(self):
         data = []
         sheet = self.book.sheet_by_index(0)
-        for col in range(1, sheet.ncols):
-            row = (col // sheet.ncols) * 2 + 1
+        for index in range(0, (sheet.ncols - 1) * (sheet.nrows - 1)):
+            row = (index // (sheet.ncols - 1)) * 2 + 1
+            col = (index % (sheet.ncols - 1)) + 1
             y = sheet.cell(row, col).value
             x = sheet.cell(row + 1, col).value
             if y == '' or x == '': break
