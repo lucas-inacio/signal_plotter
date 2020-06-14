@@ -101,15 +101,18 @@ class MainFrame(tk.Frame):
 
     def openFile(self):
         filename = filedialog.askopenfilename(filetypes=self.fileTypes)
-        print(filename)
         reader = None
         if filename and filename.endswith('.csv'):
             reader = CSVReader(filename)
         elif filename:
             reader = XLSReader(filename)
+        else:
+            return
+        self.stopCapture()
         data = reader.read()
         x = [i[0] for i in data]
         y = [i[1] for i in data]
+        self.curve.restart()
         self.curve.setData(x, y)
 
 def main():
