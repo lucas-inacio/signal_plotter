@@ -1,7 +1,7 @@
+import os
 from pathvalidate import ValidationError, validate_filepath
 import serial
 import SerialPort
-import sys
 import tkinter as tk
 
 
@@ -60,7 +60,11 @@ class SerialDialog(tk.simpledialog.Dialog):
         for i in self.filetypes:
             if format in i:
                 filePath = filePath + i[1]
-        self.text.insert(0, filePath)
+        if os.path.isfile(filePath):
+            self.bell()
+            answer = tk.messagebox.askquestion(message='Sobrescrever arquivo?')
+            if answer == 'yes':
+                self.text.insert(0, filePath)
 
     def validate(self):
         self.comsettings['port'] = self.port.get()
