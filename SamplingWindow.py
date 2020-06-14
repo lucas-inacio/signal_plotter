@@ -19,6 +19,11 @@ class SamplingWindow(CurveWindow):
         self.ydata = self.ydata[-self.maxSamples:]
         self.setData(self.xdata, self.ydata)
 
+    def setData(self, x, y):
+        self.xdata = x
+        self.ydata = y
+        super().setData(x, y)
+
     def restart(self):
         self.xdata = []
         self.ydata = []
