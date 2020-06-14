@@ -13,7 +13,8 @@ import tkinter as tk
 
 
 class SerialDialog(tk.simpledialog.Dialog):
-    def __init__(self, master=None, title='None', callback=None):
+    def __init__(self, master=None, title='None', callback=None, filetypes=None):
+        self.filetypes = filetypes
         self.comsettings = {
             'port': '',
             'baudrate': 9600,
@@ -53,11 +54,20 @@ class SerialDialog(tk.simpledialog.Dialog):
                 'Bits de parada', serialTemp.getStopBits())
             self.text = tk.Entry(self.frame)
             self.text.grid(row=5, column=0, padx=5)
-            self.buttonFile = tk.Button(self.frame, text='Salvar como', command=self.setPath)
+            self.buttonFile = tk.Button(
+                self.frame, text='Salvar como', command=self.setPath)
             self.buttonFile.grid(row=5, column=1, padx=5)
 
     def setPath(self):
-        self.text.insert(0, tk.filedialog.asksaveasfilename())
+        selectedType = tk.StringVar()
+        filePath = tk.filedialog.asksaveasfilename(
+            filetypes=self.filetypes,
+            typevariable=selectedType)
+        format = selectedType.get()
+        for i in self.filetypes:
+            if format in i:
+                filePath = filePath + i[1]
+        self.text.insert(0, filePath)
 
     def validate(self):
         self.comsettings['port'] = self.port.get()

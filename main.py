@@ -72,7 +72,10 @@ class MainFrame(tk.Frame):
         self.curve.restart()
         
     def startComDialog(self):
-        SerialDialog(self, title='Configurações de captura', callback=self.startCapture)
+        SerialDialog(
+            self, title='Configurações de captura', 
+            callback=self.startCapture,
+            filetypes=[('CSV', '.csv'), ('Excel (1995 - 2003)', '.xls')])
 
     def stopCapture(self):
         if self.serialPort.isOpen():
@@ -99,7 +102,7 @@ class MainFrame(tk.Frame):
 
     def openFile(self):
         filename = filedialog.askopenfilename(
-            filetypes=[("Arquivos de texto", ".txt")])
+            filetypes=[('CSV files', '.csv'), ('Excel (1995 - 2003)', '.xls')])
         if filename:
             pass
 
