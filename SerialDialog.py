@@ -7,7 +7,7 @@ import tkinter as tk
 
 class SerialDialog(tk.simpledialog.Dialog):
     def __init__(self, master=None, title='None', callback=None, filetypes=None):
-        self.filetypes = filetypes
+        self.fileTypes = filetypes
         self.comsettings = {
             'port': '',
             'baudrate': 9600,
@@ -51,20 +51,38 @@ class SerialDialog(tk.simpledialog.Dialog):
                 self.frame, text='Salvar como', command=self.setPath)
             self.buttonFile.grid(row=5, column=1, padx=5)
 
+    def fixFilePath(self, filePath, selectedType):
+        extension = None
+        format = selectedType.get()
+        for i in self.fileTypes:
+            if format in i:
+                extension = i[1]
+                break
+        fixedFilePath = filePath
+        if not (fixedFilePath.endswith(extension)):
+            fixedFilePath = fixedFilePath + extension
+        return fixedFilePath
+    
+    def shouldOverwrite(self):
+        self.bell()
+        answer = tk.messagebox.askquestion(self, message='Sobrescrever arquivo?')
+        if answer == 'yes':
+            return True
+        return False
+
     def setPath(self):
         selectedType = tk.StringVar()
         filePath = tk.filedialog.asksaveasfilename(
-            filetypes=self.filetypes,
+            filetypes=self.fileTypes,
             typevariable=selectedType)
-        format = selectedType.get()
-        for i in self.filetypes:
-            if format in i:
-                filePath = filePath + i[1]
-        if os.path.isfile(filePath):
-            self.bell()
-            answer = tk.messagebox.askquestion(message='Sobrescrever arquivo?')
-            if answer == 'yes':
-                self.text.insert(0, filePath)
+        fixedFilePath = self.fixFilePath(filePath,selectedType)
+        if len(fixedFilePath) != len(filePath):
+            if (not os.path.isfile(fixedFilePath)) or self.shouldOverwrite():
+                self.text.delete(0, tk.END)
+                self.text.insert(0, fixedFilePath)
+        else:
+            self.text.delete(0, tk.END)
+            self.text.insert(0, fixedFilePath)
 
     def validate(self):
         self.comsettings['port'] = self.port.get()

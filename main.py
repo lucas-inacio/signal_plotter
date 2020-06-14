@@ -32,6 +32,7 @@ class MainFrame(tk.Frame):
         self.fileTask = None
         self.file = None
         self.filePath = ''
+        self.fileTypes = [('CSV', '.csv'), ('Excel (1995 - 2003)', '.xls')]
 
         # Curva
         self.curve = SamplingWindow(self)
@@ -50,7 +51,10 @@ class MainFrame(tk.Frame):
             self.serialPort.close()
         # Abre arquivo e inicia thread para escrita
         self.filePath = filePath
-        self.file = XLSLogger(self.filePath)
+        if filePath.endswith('.xls'):
+            self.file = XLSLogger(self.filePath)
+        else:
+            self.file = CSVLogger(self.filePath)
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
@@ -69,7 +73,7 @@ class MainFrame(tk.Frame):
         SerialDialog(
             self, title='Configurações de captura', 
             callback=self.startCapture,
-            filetypes=[('CSV', '.csv'), ('Excel (1995 - 2003)', '.xls')])
+            filetypes=self.fileTypes)
 
     def stopCapture(self):
         if self.serialPort.isOpen():
@@ -95,8 +99,7 @@ class MainFrame(tk.Frame):
             self.master.after(100, self.sampleLoop)
 
     def openFile(self):
-        filename = filedialog.askopenfilename(
-            filetypes=[('CSV files', '.csv'), ('Excel (1995 - 2003)', '.xls')])
+        filename = filedialog.askopenfilename(filetypes=self.fileTypes)
         if filename:
             pass
 
