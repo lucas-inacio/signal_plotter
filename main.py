@@ -44,7 +44,7 @@ class MainFrame(tk.Frame):
         self.curve.setYLimit(0, 6)
 
     def updateCurve(self, x, y):
-        self.curve.addSample(x, y)
+        self.curve.addSamples(x, y)
         self.fileTask.write([x, y])
 
     def startCapture(self, comsettings, filePath):
@@ -95,7 +95,7 @@ class MainFrame(tk.Frame):
 
     def sampleLoop(self):
         if self.serialPort.isOpen():
-            sample = self.sampler.getSample()
+            sample = self.sampler.getSamples()
             if sample : self.updateCurve(sample[0], sample[1])
             self.master.after(100, self.sampleLoop)
 
