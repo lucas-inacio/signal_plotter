@@ -8,6 +8,18 @@ class SamplingWindow(CurveWindow):
         self.xdata = []
         self.ydata = []
 
+    def addSamples(self, x, y):
+        left, right = self.getXLimit()
+        if x[-1] > right:
+            self.setXLimit(x[-1] - (right - left), x[-1])
+
+        self.xdata.extend(x)
+        self.ydata.extend(y)
+        self.xdata = self.xdata[-self.maxSamples:]
+        self.ydata = self.ydata[-self.maxSamples:]
+        self.setData(self.xdata, self.ydata)
+
+
     def addSample(self, x, y):
         left, right = self.getXLimit()
         if x > right:

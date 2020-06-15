@@ -29,7 +29,12 @@ class CSVLogger(DataLogger):
         return file
 
     def write(self, data):
-        self.writer.writerow(data)
+        dataX = data[0]
+        dataY = data[1]
+        if len(dataX) != len(dataY): raise ValueError
+
+        for index in range(0, len(dataX)):
+            self.writer.writerow([dataX[index], dataY[index]])
 
     def flush(self):
         self.file.flush()
@@ -52,14 +57,19 @@ class XLSLogger(DataLogger):
         return file
 
     def write(self, data):
-        col = self.sampleCount % self.maxCols + 1
-        row = (self.sampleCount // self.maxCols) * 2 + 1
-        if col == 1:
-            self.amostras.write(row, 0, 'Medida')
-            self.amostras.write(row + 1, 0, 'Horário')
-        self.amostras.write(row, col, data[1])
-        self.amostras.write(row + 1, col, data[0])
-        self.sampleCount = self.sampleCount + 1
+        dataX = data[0]
+        dataY = data[1]
+        if len(dataX) != len(dataY): raise ValueError
+
+        for index in range(0, len(dataX)):
+            col = self.sampleCount % self.maxCols + 1
+            row = (self.sampleCount // self.maxCols) * 2 + 1
+            if col == 1:
+                self.amostras.write(row, 0, 'Medida')
+                self.amostras.write(row + 1, 0, 'Horário')
+            self.amostras.write(row, col, dataY[index])
+            self.amostras.write(row + 1, col, dataX[index])
+            self.sampleCount = self.sampleCount + 1
 
     def flush(self):
         self.book.save(self.file)
