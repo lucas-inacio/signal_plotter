@@ -13,6 +13,11 @@ class SamplingWindow(CurveWindow):
         if x[-1] > right:
             self.setXLimit(x[-1] - (right - left), x[-1])
 
+        bottom, top = self.getYLimit()
+        if y[-1] > top or y[-1] < bottom:
+            yOffset = (top - bottom) / 2
+            self.setYLimit(y[-1] - yOffset, y[-1] + yOffset)
+
         self.xdata.extend(x)
         self.ydata.extend(y)
         self.xdata = self.xdata[-self.maxSamples:]
