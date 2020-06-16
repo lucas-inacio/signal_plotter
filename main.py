@@ -91,11 +91,12 @@ class MainFrame(tk.Frame):
         self.master.destroy()
 
     def startLoop(self):
-        if not self.sampler.isReady():
-            self.sampler.sendStart()
-            self.master.after(100, self.startLoop)
-        else:
-            self.master.after(100, self.sampleLoop)
+        if self.serialPort.isOpen():
+            if not self.sampler.isReady():
+                self.sampler.sendStart()
+                self.master.after(100, self.startLoop)
+            else:
+                self.master.after(100, self.sampleLoop)
 
     def sampleLoop(self): 
         if self.serialPort.isOpen():
