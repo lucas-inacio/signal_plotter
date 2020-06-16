@@ -59,7 +59,7 @@ class SerialDialog(tk.simpledialog.Dialog):
                 extension = i[1]
                 break
         fixedFilePath = filePath
-        if not (fixedFilePath.endswith(extension)):
+        if extension and not (fixedFilePath.endswith(extension)):
             fixedFilePath = fixedFilePath + extension
         return fixedFilePath
     
@@ -75,7 +75,7 @@ class SerialDialog(tk.simpledialog.Dialog):
         filePath = tk.filedialog.asksaveasfilename(
             filetypes=self.fileTypes,
             typevariable=selectedType)
-        fixedFilePath = self.fixFilePath(filePath,selectedType)
+        fixedFilePath = self.fixFilePath(filePath, selectedType)
         if len(fixedFilePath) != len(filePath):
             if (not os.path.isfile(fixedFilePath)) or self.shouldOverwrite():
                 self.text.delete(0, tk.END)
