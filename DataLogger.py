@@ -69,7 +69,7 @@ class XLSLogger(DataLogger):
             col = self.sampleCount % self.maxCols + 1
             row = (self.sampleCount // self.maxCols) + 1
             if col == 1:
-                self.amostras.write(row, 0, dataX[index] // self.cycleSize)
+                self.amostras.write(row, 0, dataX[index] // self.cycleSize + 1)
             self.amostras.write(row, col, dataY[index])
             self.sampleCount = self.sampleCount + 1
 

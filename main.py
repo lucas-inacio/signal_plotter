@@ -110,10 +110,13 @@ class MainFrame(tk.Frame):
             return
         self.stopCapture()
         data = reader.read()
-        x = [i[0] for i in data]
-        y = [i[1] for i in data]
-        self.curve.restart()
-        self.curve.setData(x, y)
+        if data:
+            x = data[0]
+            y = data[1]
+            self.curve.restart()
+            self.curve.setData(x, y)
+        else:
+            tk.messagebox.showerror(message='Arquivo incompatível')
 
 def main():
     root = tk.Tk()

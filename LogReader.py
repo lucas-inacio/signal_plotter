@@ -25,12 +25,18 @@ class CSVReader(LogReader):
         return open(self.filePath, 'r', newline='')
 
     def read(self):
-        data = []
+        dataX = []
+        dataY = []
+        count = 0
         for i in self.reader:
-            x = float(i[0])
+            count = count + 1
             y = float(i[1])
-            data.append([x, y])
-        return data
+            dataX.append(count)
+            dataY.append(y)
+        if len(dataX) > 0:
+            return [dataX, dataY]
+        else:
+            return None
 
 class XLSReader(LogReader):
     def __init__(self, filePath):
@@ -41,16 +47,21 @@ class XLSReader(LogReader):
         return xlrd.open_workbook(self.filePath)
 
     def read(self):
-        data = []
+        dataX = []
+        dataY = []
         sheet = self.book.sheet_by_index(0)
         for index in range(0, (sheet.ncols - 1) * (sheet.nrows - 1)):
-            row = (index // (sheet.ncols - 1)) * 2 + 1
+            row = (index // (sheet.ncols - 1)) + 1
             col = (index % (sheet.ncols - 1)) + 1
             y = sheet.cell(row, col).value
-            x = sheet.cell(row + 1, col).value
+            x = index + 1
             if y == '' or x == '': break
-            data.append([float(x), float(y)])
-        return data
+            dataX.append(x)
+            dataY.append(y)
+        if len(dataX) > 0:
+            return [dataX, dataY]
+        else:
+            return None
 
     def close(self):
         pass
