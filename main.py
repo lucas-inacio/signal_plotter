@@ -1,7 +1,6 @@
 from tkinter import filedialog
 import tkinter as tk
 
-# Parte do projeto
 from DataLogger import CSVLogger, XLSLogger
 from LogReader import CSVReader, XLSReader
 from Sampler import Sampler
