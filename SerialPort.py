@@ -11,12 +11,12 @@ class SerialPort:
 
     def begin(self, port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=None):
         if not self.serialPort.is_open:
-            self.serialPort.port = port
             self.serialPort.baudrate = baudrate
             self.serialPort.bytesize = bytesize
             self.serialPort.parity = parity
             self.serialPort.stopbits = stopbits
             self.serialPort.timeout = timeout
+            self.serialPort.port = port
             self.serialPort.open()
 
     def close(self):
@@ -50,13 +50,16 @@ class SerialPort:
         return int.from_bytes(data, byteorder, signed=False)
 
     def write(self, data):
-        self.serialPort.write(data)
+        return self.serialPort.write(data)
 
     def writeInt16(self, number, byteorder='little'):
-        self.serialPort.write(number.to_bytes(2, byteorder, signed=True))
+        return self.serialPort.write((number).to_bytes(2, byteorder, signed=True))
 
     def writeUint16(self, number, byteorder='little'):
-        self.serialPort.write(number.to_bytes(2, byteorder, signed=False))
+        return self.serialPort.write((number).to_bytes(2, byteorder, signed=False))
+
+    def flush(self):
+        self.serialPort.flush()
 
 
 def GetPortsList():
