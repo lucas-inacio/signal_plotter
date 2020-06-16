@@ -9,6 +9,7 @@ from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
 import SerialPort
+import xlrd
 
 class MainFrame(tk.Frame):
     def __init__(self, master=None):
@@ -102,14 +103,19 @@ class MainFrame(tk.Frame):
     def openFile(self):
         filename = filedialog.askopenfilename(filetypes=self.fileTypes)
         reader = None
-        if filename and filename.endswith('.csv'):
-            reader = CSVReader(filename)
-        elif filename:
-            reader = XLSReader(filename)
-        else:
-            return
-        self.stopCapture()
-        data = reader.read()
+
+        try:
+            if filename and filename.endswith('.csv'):
+                reader = CSVReader(filename)
+            elif filename:
+                reader = XLSReader(filename)
+            else:
+                return
+            self.stopCapture()
+            data = reader.read()
+        except xlrd.XLRDError:
+            data = None
+
         if data:
             x = data[0]
             y = data[1]
