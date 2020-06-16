@@ -49,8 +49,7 @@ class MainFrame(tk.Frame):
         self.fileTask.write([x, y])
 
     def startCapture(self, comsettings, filePath):
-        if self.serialPort.isOpen():
-            self.serialPort.close()
+        self.stopCapture()
         # Abre arquivo e inicia thread para escrita
         self.filePath = filePath
         if filePath.endswith('.xls'):
@@ -60,13 +59,8 @@ class MainFrame(tk.Frame):
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
-        self.serialPort.begin(port=comsettings['port'],
-                              baudrate=comsettings['baudrate'],
-                              bytesize=comsettings['bytesize'],
-                              parity=comsettings['parity'],
-                              stopbits=comsettings['stopbits'])
-        self.sampler.reset()
-        self.sampleLoop()
+        self.sampler.begin(comsettings)
+        self.startLoop()
 
         # Reinicia gráfico
         self.curve.restart()
@@ -79,6 +73,8 @@ class MainFrame(tk.Frame):
 
     def stopCapture(self):
         if self.serialPort.isOpen():
+            self.sampler.sendStop()
+            self.sampler.reset()
             self.serialPort.close()
         self.closeFile()
     
@@ -94,7 +90,14 @@ class MainFrame(tk.Frame):
         self.closeFile()
         self.master.destroy()
 
-    def sampleLoop(self):
+    def startLoop(self):
+        if not self.sampler.isReady():
+            self.sampler.sendStart()
+            self.master.after(100, self.startLoop)
+        else:
+            self.master.after(100, self.sampleLoop)
+
+    def sampleLoop(self): 
         if self.serialPort.isOpen():
             sample = self.sampler.getSamples()
             if sample : self.updateCurve(sample[0], sample[1])
