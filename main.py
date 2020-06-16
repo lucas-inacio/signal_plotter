@@ -38,9 +38,9 @@ class MainFrame(tk.Frame):
         # Curva
         self.curve = SamplingWindow(self)
         self.curve.grid()
-        self.curve.setXLabel('Tempo (s)')
+        self.curve.setXLabel('Índice da Amostra')
         self.curve.setYLabel('Tensão (V)')
-        self.curve.setXLimit(0, 10)
+        self.curve.setXLimit(0, 24)
         self.curve.setYLimit(0, 6)
 
     def updateCurve(self, x, y):

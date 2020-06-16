@@ -20,9 +20,10 @@ class DataLogger():
         self.file.close()
 
 class CSVLogger(DataLogger):
-    def __init__(self, filePath):
+    def __init__(self, filePath, cycleSize=12):
         super().__init__(filePath)
         self.writer = csv.writer(self.file)
+        self.cycleSize = cycleSize
 
     def open(self):
         file = open(self.filePath, 'w', newline='')
@@ -34,7 +35,8 @@ class CSVLogger(DataLogger):
         if len(dataX) != len(dataY): raise ValueError
 
         for index in range(0, len(dataX)):
-            self.writer.writerow([dataX[index], dataY[index]])
+            self.writer.writerow(
+                [dataX[index] // self.cycleSize + 1, dataY[index]])
 
     def flush(self):
         self.file.flush()
@@ -43,14 +45,16 @@ class CSVLogger(DataLogger):
         self.file.close()
 
 class XLSLogger(DataLogger):
-    def __init__(self, filePath, maxCols=12):
+    def __init__(self, filePath, maxCols=12, cycleSize=12):
         super().__init__(filePath)
         self.book = Workbook(encoding='utf-8')
         self.amostras = self.book.add_sheet('Amostras')
+        self.amostras.write(0, 0, 'Ciclo')
         for col in range(0, maxCols):
             self.amostras.write(0, col + 1, 'Bateria ' + str(col + 1))
         self.sampleCount = 0
         self.maxCols = maxCols
+        self.cycleSize = cycleSize
 
     def open(self):
         file = open(self.filePath, 'wb')
@@ -63,12 +67,10 @@ class XLSLogger(DataLogger):
 
         for index in range(0, len(dataX)):
             col = self.sampleCount % self.maxCols + 1
-            row = (self.sampleCount // self.maxCols) * 2 + 1
+            row = (self.sampleCount // self.maxCols) + 1
             if col == 1:
-                self.amostras.write(row, 0, 'Medida')
-                self.amostras.write(row + 1, 0, 'Horário')
+                self.amostras.write(row, 0, dataX[index] // self.cycleSize)
             self.amostras.write(row, col, dataY[index])
-            self.amostras.write(row + 1, col, dataX[index])
             self.sampleCount = self.sampleCount + 1
 
     def flush(self):
