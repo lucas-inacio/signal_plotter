@@ -87,7 +87,7 @@ class MainFrame(tk.Frame):
             self.file = None
         
     def closeWindow(self):
-        self.closeFile()
+        self.stopCapture()
         self.master.destroy()
 
     def startLoop(self):
