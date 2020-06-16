@@ -9,6 +9,7 @@ from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
 import SerialPort
+import xlrd
 
 class MainFrame(tk.Frame):
     def __init__(self, master=None):
@@ -38,9 +39,9 @@ class MainFrame(tk.Frame):
         # Curva
         self.curve = SamplingWindow(self)
         self.curve.grid()
-        self.curve.setXLabel('Tempo (s)')
+        self.curve.setXLabel('Índice da Amostra')
         self.curve.setYLabel('Tensão (V)')
-        self.curve.setXLimit(0, 10)
+        self.curve.setXLimit(0, 24)
         self.curve.setYLimit(0, 6)
 
     def updateCurve(self, x, y):
@@ -102,18 +103,26 @@ class MainFrame(tk.Frame):
     def openFile(self):
         filename = filedialog.askopenfilename(filetypes=self.fileTypes)
         reader = None
-        if filename and filename.endswith('.csv'):
-            reader = CSVReader(filename)
-        elif filename:
-            reader = XLSReader(filename)
+
+        try:
+            if filename and filename.endswith('.csv'):
+                reader = CSVReader(filename)
+            elif filename:
+                reader = XLSReader(filename)
+            else:
+                return
+            self.stopCapture()
+            data = reader.read()
+        except xlrd.XLRDError:
+            data = None
+
+        if data:
+            x = data[0]
+            y = data[1]
+            self.curve.restart()
+            self.curve.setData(x, y)
         else:
-            return
-        self.stopCapture()
-        data = reader.read()
-        x = [i[0] for i in data]
-        y = [i[1] for i in data]
-        self.curve.restart()
-        self.curve.setData(x, y)
+            tk.messagebox.showerror(message='Arquivo incompatível')
 
 def main():
     root = tk.Tk()
