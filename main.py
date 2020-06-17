@@ -16,13 +16,29 @@ class MainFrame(tk.Frame):
         self.master = master
         self.grid()
         
+        # Menus
         self.menubar = tk.Menu(self)
         self.master['menu'] = self.menubar
         menu_file = tk.Menu(self.menubar)
+        # Menu Arquivo
         self.menubar.add_cascade(menu=menu_file, label='Arquivo')
         menu_file.add_command(label='Abrir', command=self.openFile)
-        menu_file.add_command(label='Iniciar captura', command=self.startComDialog)
-        menu_file.add_command(label='Parar captura', command=self.stopCapture)
+        menu_file.add_command(label='Iniciar captura',
+                              command=self.startComDialog)
+        menu_file.add_command(label='Parar captura',
+                              command=self.stopCapture)
+        # Menu Bateria
+        self.currentBattery = 1
+        self.batterySelector = tk.IntVar()
+        self.batterySelector.set(1)
+        self.callbackName = self.batterySelector.trace_add(
+            'write', self.onBatteryChange)
+        menu_view = tk.Menu(self.menubar)
+        self.menubar.add_cascade(menu=menu_view, label='Bateria')
+        for i in range(1, 13):
+            menu_view.add_radiobutton(label=str(i),
+                                      variable=self.batterySelector)
+        # Ao fechar a janela
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
         # Aquisição
@@ -42,6 +58,9 @@ class MainFrame(tk.Frame):
         self.curve.setYLabel('Tensão (V)')
         self.curve.setXLimit(0, 24)
         self.curve.setYLimit(0, 6)
+
+    def onBatteryChange(self, variable, index, mode):
+        self.currentBattery = self.batterySelector.get()
 
     def updateCurve(self, x, y):
         self.curve.addSamples(x, y)
