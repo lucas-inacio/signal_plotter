@@ -60,3 +60,8 @@ class SamplingWindow(CurveWindow):
         bottom, top = self.getYLimit()
         self.setYLimit(0, top - bottom)
         self.setData(self.xdata, self.ydata)
+
+    def clear(self):
+        self.xdata = []
+        self.ydata = []
+        super().setData(self.xdata, self.ydata)

@@ -71,7 +71,7 @@ class MainFrame(tk.Frame):
             self.loadBatteryFrom(self.filePath)
         elif self.uiState == 'acqu':
             self.filter.setIndex(self.batterySelector.get())
-            self.curve.restart()
+            self.curve.clear()
         elif self.uiState == 'stop':
             pass
 
