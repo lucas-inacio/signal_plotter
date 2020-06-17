@@ -16,7 +16,7 @@ class MainFrame(tk.Frame):
         super().__init__(master)
         self.master = master
         self.grid()
-        self.uiState = 'main' # Possíveis estados: main, acqu, file e stop
+        self.uiState = 'main' # Possíveis estados: main, acqu e file
         
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
         self.buildMenu()
@@ -72,8 +72,6 @@ class MainFrame(tk.Frame):
         elif self.uiState == 'acqu':
             self.filter.setIndex(self.batterySelector.get())
             self.curve.clear()
-        elif self.uiState == 'stop':
-            pass
 
     def updateCurve(self, x, y):
         self.curve.addSamples(x, y)
@@ -109,7 +107,7 @@ class MainFrame(tk.Frame):
             self.sampler.reset()
             self.serialPort.close()
         self.closeFile()
-        self.setMenuStateStop()
+        self.setMenuStateFile()
     
     def closeFile(self):
         if self.fileTask:
@@ -187,13 +185,6 @@ class MainFrame(tk.Frame):
         self.menu_file.entryconfig('Abrir', state=tk.DISABLED)
         self.menu_file.entryconfig('Iniciar captura', state=tk.DISABLED)
         self.menu_file.entryconfig('Parar captura', state=tk.NORMAL)
-
-    def setMenuStateStop(self):
-        self.uiState = 'stop'
-        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
-        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
-        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
-        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
 
 
 def main():
