@@ -41,6 +41,12 @@ class MainFrame(tk.Frame):
 
     def onBatteryChange(self, variable, index, mode):
         self.currentBattery = self.batterySelector.get()
+        if self.uiState == 'file':
+            pass
+        elif self.uiState == 'acqu':
+            pass
+        elif self.uiState == 'stop':
+            pass
 
     def updateCurve(self, x, y):
         self.curve.addSamples(x, y)
@@ -121,8 +127,10 @@ class MainFrame(tk.Frame):
             data = None
 
         if data:
-            x = data[0]
-            y = data[1]
+            index = self.currentBattery
+            # Filtra os dados da bateria selecionada
+            x = [data[0][i] for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
+            y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
             self.curve.restart()
             self.curve.setData(x, y)
             self.setMenuStateFile()
