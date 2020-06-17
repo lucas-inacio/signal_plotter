@@ -15,9 +15,11 @@ class MainFrame(tk.Frame):
         super().__init__(master)
         self.master = master
         self.grid()
+        self.uiState = 'main' # Possíveis estados: main, acqu, file e stop
         
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
         self.buildMenu()
+        self.setMenuStateMain()
 
         # Aquisição
         self.serialPort = SerialPort.SerialPort()
@@ -60,6 +62,7 @@ class MainFrame(tk.Frame):
 
         # Reinicia gráfico
         self.curve.restart()
+        self.setMenuStateAcqu()
         
     def startComDialog(self):
         SerialDialog(
@@ -73,6 +76,7 @@ class MainFrame(tk.Frame):
             self.sampler.reset()
             self.serialPort.close()
         self.closeFile()
+        self.setMenuStateStop()
     
     def closeFile(self):
         if self.fileTask:
@@ -121,6 +125,8 @@ class MainFrame(tk.Frame):
             y = data[1]
             self.curve.restart()
             self.curve.setData(x, y)
+            self.setMenuStateFile()
+            self.filePath = filename
         else:
             tk.messagebox.showerror(message='Arquivo incompatível')
 
@@ -128,25 +134,54 @@ class MainFrame(tk.Frame):
         # Menus
         self.menubar = tk.Menu(self)
         self.master['menu'] = self.menubar
-        menu_file = tk.Menu(self.menubar)
+        self.menu_file = tk.Menu(self.menubar)
         # Menu Arquivo
-        self.menubar.add_cascade(menu=menu_file, label='Arquivo')
-        menu_file.add_command(label='Abrir', command=self.openFile)
-        menu_file.add_command(label='Iniciar captura',
-                              command=self.startComDialog)
-        menu_file.add_command(label='Parar captura',
-                              command=self.stopCapture)
+        self.menubar.add_cascade(menu=self.menu_file, label='Arquivo')
+        self.menu_file.add_command(label='Abrir', command=self.openFile)
+        self.menu_file.add_command(label='Iniciar captura',
+                                   command=self.startComDialog)
+        self.menu_file.add_command(label='Parar captura',
+                                   command=self.stopCapture)
         # Menu Bateria
         self.currentBattery = 1
         self.batterySelector = tk.IntVar()
         self.batterySelector.set(1)
         self.callbackName = self.batterySelector.trace_add(
             'write', self.onBatteryChange)
-        menu_view = tk.Menu(self.menubar)
-        self.menubar.add_cascade(menu=menu_view, label='Bateria')
+        self.menu_batt = tk.Menu(self.menubar)
+        self.menubar.add_cascade(menu=self.menu_batt, label='Bateria')
         for i in range(1, 13):
-            menu_view.add_radiobutton(label=str(i),
-                                      variable=self.batterySelector)
+            self.menu_batt.add_radiobutton(label=str(i),
+                                           variable=self.batterySelector)
+
+    def setMenuStateMain(self):
+        self.uiState = 'main'
+        self.menubar.entryconfig('Bateria', state=tk.DISABLED)
+        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
+        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
+
+    def setMenuStateFile(self):
+        self.uiState = 'file'
+        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
+        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
+        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
+
+    def setMenuStateAcqu(self):
+        self.uiState = 'acqu'
+        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
+        self.menu_file.entryconfig('Abrir', state=tk.DISABLED)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.DISABLED)
+        self.menu_file.entryconfig('Parar captura', state=tk.NORMAL)
+
+    def setMenuStateStop(self):
+        self.uiState = 'stop'
+        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
+        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
+        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
+
 
 def main():
     root = tk.Tk()
