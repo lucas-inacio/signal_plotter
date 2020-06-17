@@ -39,10 +39,29 @@ class MainFrame(tk.Frame):
         self.curve.setXLimit(0, 24)
         self.curve.setYLimit(0, 6)
 
+    def loadBatteryFrom(self, filepath):
+        try:
+            if filepath and filepath.endswith('.csv'):
+                reader = CSVReader(filepath)
+            elif filepath:
+                reader = XLSReader(filepath)
+            else:
+                return False
+            index = self.currentBattery
+            data = reader.read()
+            # Filtra os dados da bateria selecionada
+            x = [data[0][i] // 13 for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
+            y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
+            self.curve.restart()
+            self.curve.setData(x, y)
+            return True
+        except xlrd.XLRDError:
+            return False
+
     def onBatteryChange(self, variable, index, mode):
         self.currentBattery = self.batterySelector.get()
         if self.uiState == 'file':
-            pass
+            self.loadBatteryFrom(self.filePath)
         elif self.uiState == 'acqu':
             pass
         elif self.uiState == 'stop':
@@ -112,27 +131,7 @@ class MainFrame(tk.Frame):
 
     def openFile(self):
         filename = filedialog.askopenfilename(filetypes=self.fileTypes)
-        reader = None
-
-        try:
-            if filename and filename.endswith('.csv'):
-                reader = CSVReader(filename)
-            elif filename:
-                reader = XLSReader(filename)
-            else:
-                return
-            self.stopCapture()
-            data = reader.read()
-        except xlrd.XLRDError:
-            data = None
-
-        if data:
-            index = self.currentBattery
-            # Filtra os dados da bateria selecionada
-            x = [data[0][i] for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
-            y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
-            self.curve.restart()
-            self.curve.setData(x, y)
+        if self.loadBatteryFrom(filename):
             self.setMenuStateFile()
             self.filePath = filename
         else:
