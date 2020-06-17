@@ -29,10 +29,10 @@ class CSVReader(LogReader):
         dataY = []
         count = 0
         for i in self.reader:
-            count = count + 1
             y = float(i[1])
             dataX.append(count)
             dataY.append(y)
+            count = count + 1
         if len(dataX) > 0:
             return [dataX, dataY]
         else:
@@ -50,14 +50,15 @@ class XLSReader(LogReader):
         dataX = []
         dataY = []
         sheet = self.book.sheet_by_index(0)
-        for index in range(0, (sheet.ncols - 1) * (sheet.nrows - 1)):
-            row = (index // (sheet.ncols - 1)) + 1
-            col = (index % (sheet.ncols - 1)) + 1
-            y = sheet.cell(row, col).value
-            x = index + 1
-            if y == '' or x == '': break
-            dataX.append(x)
-            dataY.append(y)
+        if sheet.ncols > 2 and sheet.nrows > 2:
+            for index in range(0, (sheet.ncols - 1) * (sheet.nrows - 1)):
+                row = (index // (sheet.ncols - 1)) + 1
+                col = (index % (sheet.ncols - 1)) + 1
+                y = sheet.cell(row, col).value
+                x = index
+                if y == '' or x == '': break
+                dataX.append(x)
+                dataY.append(y)
         if len(dataX) > 0:
             return [dataX, dataY]
         else:

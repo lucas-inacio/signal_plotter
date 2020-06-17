@@ -4,6 +4,7 @@ import tkinter as tk
 from DataLogger import CSVLogger, XLSLogger
 from LogReader import CSVReader, XLSReader
 from Sampler import Sampler
+from SampleFilter import SampleFilter
 from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
@@ -15,15 +16,11 @@ class MainFrame(tk.Frame):
         super().__init__(master)
         self.master = master
         self.grid()
+        self.uiState = 'main' # Possíveis estados: main, acqu e file
         
-        self.menubar = tk.Menu(self)
-        self.master['menu'] = self.menubar
-        menu_file = tk.Menu(self.menubar)
-        self.menubar.add_cascade(menu=menu_file, label='Arquivo')
-        menu_file.add_command(label='Abrir', command=self.openFile)
-        menu_file.add_command(label='Iniciar captura', command=self.startComDialog)
-        menu_file.add_command(label='Parar captura', command=self.stopCapture)
         self.master.protocol("WM_DELETE_WINDOW", self.closeWindow)
+        self.buildMenu()
+        self.setMenuStateMain()
 
         # Aquisição
         self.serialPort = SerialPort.SerialPort()
@@ -36,12 +33,45 @@ class MainFrame(tk.Frame):
         self.fileTypes = [('CSV', '.csv'), ('Excel (1995 - 2003)', '.xls')]
 
         # Curva
-        self.curve = SamplingWindow(self)
+        self.filter = SampleFilter(index=1, mod=12)
+        self.curve = SamplingWindow(self, filter=self.filter)
         self.curve.grid()
         self.curve.setXLabel('Índice da Amostra')
         self.curve.setYLabel('Tensão (V)')
         self.curve.setXLimit(0, 24)
         self.curve.setYLimit(0, 6)
+
+    def loadBatteryFrom(self, filepath):
+        try:
+            if filepath and filepath.endswith('.csv'):
+                reader = CSVReader(filepath)
+            elif filepath:
+                reader = XLSReader(filepath)
+            else:
+                return False
+
+            index = self.currentBattery
+            data = reader.read()
+            if data:
+                x = data[0]
+                y = data[1]
+                self.filter.setIndex(index)
+                self.curve.restart()
+                self.curve.setData(x, y)
+                return True
+        except xlrd.XLRDError:
+            pass
+
+        tk.messagebox.showerror(message='Arquivo incompatível')
+        return False
+
+    def onBatteryChange(self, variable, index, mode):
+        self.currentBattery = self.batterySelector.get()
+        if self.uiState == 'file':
+            self.loadBatteryFrom(self.filePath)
+        elif self.uiState == 'acqu':
+            self.filter.setIndex(self.batterySelector.get())
+            self.curve.clear()
 
     def updateCurve(self, x, y):
         self.curve.addSamples(x, y)
@@ -63,6 +93,7 @@ class MainFrame(tk.Frame):
 
         # Reinicia gráfico
         self.curve.restart()
+        self.setMenuStateAcqu()
         
     def startComDialog(self):
         SerialDialog(
@@ -76,6 +107,7 @@ class MainFrame(tk.Frame):
             self.sampler.reset()
             self.serialPort.close()
         self.closeFile()
+        self.setMenuStateFile()
     
     def closeFile(self):
         if self.fileTask:
@@ -105,27 +137,55 @@ class MainFrame(tk.Frame):
 
     def openFile(self):
         filename = filedialog.askopenfilename(filetypes=self.fileTypes)
-        reader = None
+        if self.loadBatteryFrom(filename):
+            self.setMenuStateFile()
+            self.filePath = filename
 
-        try:
-            if filename and filename.endswith('.csv'):
-                reader = CSVReader(filename)
-            elif filename:
-                reader = XLSReader(filename)
-            else:
-                return
-            self.stopCapture()
-            data = reader.read()
-        except xlrd.XLRDError:
-            data = None
+    def buildMenu(self):
+        # Menus
+        self.menubar = tk.Menu(self)
+        self.master['menu'] = self.menubar
+        self.menu_file = tk.Menu(self.menubar)
+        # Menu Arquivo
+        self.menubar.add_cascade(menu=self.menu_file, label='Arquivo')
+        self.menu_file.add_command(label='Abrir', command=self.openFile)
+        self.menu_file.add_command(label='Iniciar captura',
+                                   command=self.startComDialog)
+        self.menu_file.add_command(label='Parar captura',
+                                   command=self.stopCapture)
+        # Menu Bateria
+        self.currentBattery = 1
+        self.batterySelector = tk.IntVar()
+        self.batterySelector.set(1)
+        self.callbackName = self.batterySelector.trace_add(
+            'write', self.onBatteryChange)
+        self.menu_batt = tk.Menu(self.menubar)
+        self.menubar.add_cascade(menu=self.menu_batt, label='Bateria')
+        for i in range(1, 13):
+            self.menu_batt.add_radiobutton(label=str(i),
+                                           variable=self.batterySelector)
 
-        if data:
-            x = data[0]
-            y = data[1]
-            self.curve.restart()
-            self.curve.setData(x, y)
-        else:
-            tk.messagebox.showerror(message='Arquivo incompatível')
+    def setMenuStateMain(self):
+        self.uiState = 'main'
+        self.menubar.entryconfig('Bateria', state=tk.DISABLED)
+        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
+        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
+
+    def setMenuStateFile(self):
+        self.uiState = 'file'
+        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
+        self.menu_file.entryconfig('Abrir', state=tk.NORMAL)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.NORMAL)
+        self.menu_file.entryconfig('Parar captura', state=tk.DISABLED)
+
+    def setMenuStateAcqu(self):
+        self.uiState = 'acqu'
+        self.menubar.entryconfig('Bateria', state=tk.NORMAL)
+        self.menu_file.entryconfig('Abrir', state=tk.DISABLED)
+        self.menu_file.entryconfig('Iniciar captura', state=tk.DISABLED)
+        self.menu_file.entryconfig('Parar captura', state=tk.NORMAL)
+
 
 def main():
     root = tk.Tk()
