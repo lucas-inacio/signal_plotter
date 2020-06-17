@@ -1,28 +1,34 @@
 from CurveWindow import CurveWindow
+from SampleFilter import BaseFilter
 
 
 class SamplingWindow(CurveWindow):
-    def __init__(self, master, maxSamples=60):
+    def __init__(self, master, maxSamples=60, filter=None):
         super().__init__(master)
         self.maxSamples = maxSamples
         self.xdata = []
         self.ydata = []
+        if filter:
+            self.filter = filter
+        else:
+            self.filter = BaseFilter()
 
     def addSamples(self, x, y):
-        left, right = self.getXLimit()
-        if x[-1] > right:
-            self.setXLimit(x[-1] - (right - left), x[-1])
+        data = self.filter.filter(x, y)
+        if data:
+            left, right = self.getXLimit()
+            if data[0][-1] > right:
+                self.setXLimit(data[0][-1] - (right - left), data[0][-1])
 
-        bottom, top = self.getYLimit()
-        if y[-1] > top or y[-1] < bottom:
-            yOffset = (top - bottom) / 2
-            self.setYLimit(y[-1] - yOffset, y[-1] + yOffset)
-
-        self.xdata.extend(x)
-        self.ydata.extend(y)
-        self.xdata = self.xdata[-self.maxSamples:]
-        self.ydata = self.ydata[-self.maxSamples:]
-        self.setData(self.xdata, self.ydata)
+            bottom, top = self.getYLimit()
+            if data[1][-1] > top or data[1][-1] < bottom:
+                yOffset = (top - bottom) / 2
+                self.setYLimit(data[1][-1] - yOffset, data[1][-1] + yOffset)
+            self.xdata.extend(data[0])
+            self.ydata.extend(data[1])
+            self.xdata = self.xdata[-self.maxSamples:]
+            self.ydata = self.ydata[-self.maxSamples:]
+            super().setData(self.xdata, self.ydata)
 
 
     def addSample(self, x, y):
@@ -37,9 +43,14 @@ class SamplingWindow(CurveWindow):
         self.setData(self.xdata, self.ydata)
 
     def setData(self, x, y):
-        self.xdata = x
-        self.ydata = y
-        super().setData(x, y)
+        data = self.filter.filter(x, y)
+        if data:
+            self.xdata = x[:len(data[0])]
+            self.ydata = data[1]
+        else:
+            self.xdata = []
+            self.ydata = []
+        super().setData(self.xdata, self.ydata)
 
     def restart(self):
         self.xdata = []

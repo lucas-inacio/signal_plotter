@@ -4,6 +4,7 @@ import tkinter as tk
 from DataLogger import CSVLogger, XLSLogger
 from LogReader import CSVReader, XLSReader
 from Sampler import Sampler
+from SampleFilter import SampleFilter
 from SamplingWindow import SamplingWindow
 from FileWriter import FileWriter  
 from SerialDialog import SerialDialog
@@ -32,7 +33,8 @@ class MainFrame(tk.Frame):
         self.fileTypes = [('CSV', '.csv'), ('Excel (1995 - 2003)', '.xls')]
 
         # Curva
-        self.curve = SamplingWindow(self)
+        self.filter = SampleFilter(index=1, mod=12)
+        self.curve = SamplingWindow(self, filter=self.filter)
         self.curve.grid()
         self.curve.setXLabel('Índice da Amostra')
         self.curve.setYLabel('Tensão (V)')
@@ -50,20 +52,26 @@ class MainFrame(tk.Frame):
             index = self.currentBattery
             data = reader.read()
             # Filtra os dados da bateria selecionada
-            x = [data[0][i] // 13 for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
-            y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
-            self.curve.restart()
-            self.curve.setData(x, y)
-            return True
+            # x = [data[0][i] // 13 for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
+            # y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
+            if data:
+                x = data[0]
+                y = data[1]
+                self.filter.setIndex(index)
+                self.curve.restart()
+                self.curve.setData(x, y)
+                return True
         except xlrd.XLRDError:
-            return False
+            pass
+        return False
 
     def onBatteryChange(self, variable, index, mode):
         self.currentBattery = self.batterySelector.get()
         if self.uiState == 'file':
             self.loadBatteryFrom(self.filePath)
         elif self.uiState == 'acqu':
-            pass
+            self.filter.setIndex(self.batterySelector.get())
+            self.curve.restart()
         elif self.uiState == 'stop':
             pass
 
