@@ -49,11 +49,9 @@ class MainFrame(tk.Frame):
                 reader = XLSReader(filepath)
             else:
                 return False
+
             index = self.currentBattery
             data = reader.read()
-            # Filtra os dados da bateria selecionada
-            # x = [data[0][i] // 13 for i in range(0, len(data[0])) if ((i + 1) % 13) == index]
-            # y = [data[1][i] for i in range(0, len(data[1])) if ((i + 1) % 13) == index]
             if data:
                 x = data[0]
                 y = data[1]
@@ -63,6 +61,8 @@ class MainFrame(tk.Frame):
                 return True
         except xlrd.XLRDError:
             pass
+
+        tk.messagebox.showerror(message='Arquivo incompatível')
         return False
 
     def onBatteryChange(self, variable, index, mode):
@@ -142,8 +142,6 @@ class MainFrame(tk.Frame):
         if self.loadBatteryFrom(filename):
             self.setMenuStateFile()
             self.filePath = filename
-        else:
-            tk.messagebox.showerror(message='Arquivo incompatível')
 
     def buildMenu(self):
         # Menus
