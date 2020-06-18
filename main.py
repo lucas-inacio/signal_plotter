@@ -1,6 +1,7 @@
 from tkinter import filedialog
 import tkinter as tk
 
+import sys
 from DataLogger import CSVLogger, XLSLogger
 from LogReader import CSVReader, XLSReader
 from Sampler import Sampler
@@ -88,6 +89,8 @@ class MainFrame(tk.Frame):
         self.fileTask = FileWriter(self.file)
         self.fileTask.start()
 
+        if sys.platform == 'win32':
+            comsettings['port'] = '\\\\.\\' + comsettings['port']
         self.sampler.begin(comsettings)
         self.startLoop()
 
