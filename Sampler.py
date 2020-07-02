@@ -51,6 +51,7 @@ class Sampler:
 
     def sendStart(self):
         if self.sampleSource.available():
+            self.sampleSource.read(1) # tira do buffer
             self.ready = True
             self.lastTimestamp = datetime.now()
         else:
