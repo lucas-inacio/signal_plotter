@@ -194,7 +194,11 @@ def main():
     root = tk.Tk()
     root.option_add('*tearOff', False) # Impede que o menu seja destacado da janela principal
     app = MainFrame(master=root)
-    app.mainloop()
+    try:
+        app.mainloop()
+    except:
+        app.closeFile()
+        raise
 
 if __name__ == '__main__':
     main()
