@@ -50,7 +50,7 @@ class XLSReader(LogReader):
         dataX = []
         dataY = []
         sheet = self.book.sheet_by_index(0)
-        if sheet.ncols > 2 and sheet.nrows > 2:
+        if sheet.ncols >= 2 and sheet.nrows >= 2:
             for index in range(0, (sheet.ncols - 1) * (sheet.nrows - 1)):
                 row = (index // (sheet.ncols - 1)) + 1
                 col = (index % (sheet.ncols - 1)) + 1
