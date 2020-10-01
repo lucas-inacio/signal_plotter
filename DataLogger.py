@@ -55,6 +55,7 @@ class XLSLogger(DataLogger):
         self.sampleCount = 0
         self.maxCols = maxCols
         self.cycleSize = cycleSize
+        self.shouldAutoSave = False
 
     def open(self):
         file = open(self.filePath, 'wb')
@@ -65,6 +66,12 @@ class XLSLogger(DataLogger):
         dataY = data[1]
         if len(dataX) != len(dataY): raise ValueError
 
+        # Verifica se uma linha foi finalizada para salvar automaticamente.
+        # Não é permitido reescrever em uma linha após flush_row_data
+        if self.shouldAutoSave and (self.sampleCount % self.maxCols) == 0:
+            self.amostras.flush_row_data()
+            self.shouldAutoSave = False
+
         for index in range(0, len(dataX)):
             col = self.sampleCount % self.maxCols + 1
             row = (self.sampleCount // self.maxCols) + 1
@@ -73,9 +80,10 @@ class XLSLogger(DataLogger):
             self.amostras.write(row, col, dataY[index])
             self.sampleCount = self.sampleCount + 1
 
+
     def flush(self):
-        self.book.save(self.file)
-        self.file.flush()
+        self.shouldAutoSave = True
 
     def close(self):
+        self.book.save(self.file)
         self.file.close()
